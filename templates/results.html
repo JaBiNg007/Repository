@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ผลลัพธ์การจัดวาง</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS สำหรับจัดรูปแบบหน้าเว็บ */
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background-color: #eef2f7; 
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container { 
+            background-color: #ffffff; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1); 
+            max-width: 900px; 
+            width: 100%;
+            margin: 20px auto;
+            border: 1px solid #e0e0e0;
+        }
+        h1 { 
+            text-align: center; 
+            color: #2c3e50; 
+            margin-bottom: 30px; 
+            font-size: 2.2em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 { 
+            color: #34495e; 
+            margin-top: 30px; 
+            margin-bottom: 20px; 
+            font-size: 1.6em;
+            border-left: 5px solid #3498db;
+            padding-left: 10px;
+        }
+        h3 {
+            color: #2980b9;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        .info-box { /* กล่องข้อมูลทั่วไป/สรุป */
+            background-color: #e8f5e9; /* สีเขียวอ่อน */
+            color: #2e7d32; /* สีเขียวเข้ม */
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c8e6c9;
+            font-weight: bold;
+        }
+        .warning-box { /* กล่องข้อควรระวัง/เตือน */
+            background-color: #fffde7; /* สีเหลืองอ่อน */
+            color: #fbc02d; /* สีเหลืองเข้ม */
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ffe082;
+            font-weight: bold;
+        }
+        .result-block { /* กล่องสำหรับแต่ละผลลัพธ์การจำลอง */
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            margin-bottom: 25px; 
+            border-radius: 10px; 
+            background-color: #fdfdfd; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        img { /* รูปภาพแผนผัง */
+            max-width: 100%; 
+            height: auto; 
+            display: block; 
+            margin: 20px auto; 
+            border: 2px solid #eee; 
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        ul { /* รายการรายละเอียดกิจกรรม */
+            list-style-type: none; 
+            padding: 0; 
+            margin-top: 15px;
+        }
+        li { 
+            margin-bottom: 8px; 
+            padding-left: 20px;
+            position: relative;
+        }
+        li::before { /* เพิ่ม bullet point แบบกำหนดเอง */
+            content: '•';
+            color: #3498db;
+            font-size: 1.2em;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        .back-button { /* ปุ่มย้อนกลับ */
+            display: inline-block; 
+            margin-top: 30px; 
+            padding: 12px 25px; 
+            background-color: #007bff; /* สีฟ้า */
+            color: white; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .back-button:hover { 
+            background-color: #0056b3; 
+        }
+        .summary-info { /* ข้อมูลสรุปด้านบน */
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+            color: #555;
+        }
+        .summary-info span {
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span style="color: #3498db;">&#10003;</span> ผลลัพธ์การจัดวางพื้นที่</h1>
+
+        <div class="summary-info">
+            <p>พื้นที่ทั้งหมด: <span>{{ board_width }}x{{ board_height }} = {{ board_width * board_height }}</span> ตร.หน่วย</p>
+            <p>พื้นที่รวมที่ต้องการ: <span>{{ total_required_area }}</span> ตร.หน่วย</p>
+        </div>
+
+        {% if total_required_area > board_width * board_height %} {# แสดงคำเตือนถ้าพื้นที่ต้องการเกินพื้นที่รวม #}
+            <div class="warning-box">
+                <p><strong>*** คำเตือน:</strong> พื้นที่รวมที่ต้องการ ({{ total_required_area }} ตร.หน่วย) เกินพื้นที่ทั้งหมด ({{ board_width * board_height }} ตร.หน่วย) บางกิจกรรมอาจไม่สามารถจัดวางได้ครบถ้วนในรูปแบบเดียว</p>
+            </div>
+        {% endif %}
+
+        {% if not results %} {# แสดงข้อความถ้าไม่พบรูปแบบที่สำเร็จ #}
+            <div class="info-box" style="background-color: #ffebee; color: #d32f2f; border-color: #ffcdd2;">
+                <p>ไม่สามารถสร้างรูปแบบการจัดวางที่ไม่ซ้ำกันได้สำเร็จตามจำนวนที่ต้องการ กรุณาลองปรับขนาดพื้นที่หรือกิจกรรมแล้วลองใหม่อีกครั้ง</p>
+            </div>
+        {% endif %}
+
+        <div class="info-box">
+            <p>สร้างรูปแบบที่ไม่ซ้ำกันได้สำเร็จ: <strong>{{ results | length }} รูปแบบ</strong></p>
+            <p>จำนวนครั้งที่พยายามทั้งหมด: <strong>{{ total_attempts }} ครั้ง</strong></p>
+            <p>จำนวนรูปแบบไม่ซ้ำกันทั้งหมดที่ค้นพบ: <strong>{{ total_unique }} รูปแบบ</strong></p>
+        </div>
+
+        {% for result in results %} {# วนลูปแสดงผลลัพธ์แต่ละรูปแบบ #}
+            <div class="result-block">
+                <h2>รูปแบบไม่ซ้ำกันที่ #{{ result.simulation_number }} (ความพยายามครั้งที่ {{ result.attempt_number }})</h2>
+                <h3>การแสดงผลการจัดวาง:</h3>
+                {# รูปภาพถูกฝังโดยตรงด้วย Base64 string #}
+                <img src="data:image/png;base64,{{ result.plot_image }}" alt="Layout Visualization for Simulation {{ result.simulation_number }}">
+                
+                <h3>รายละเอียดกิจกรรมที่จัดวางได้:</h3>
+                <ul>
+                    {% for detail in result.activity_details %} {# วนลูปแสดงรายละเอียดกิจกรรมแต่ละอัน #}
+                        <li>{{ detail }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+
+        <a href="/" class="back-button">← กลับไปยังหน้าป้อนข้อมูล</a>
+    </div>
+</body>
+</html>

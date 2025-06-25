@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โปรแกรมจัดวางพื้นที่</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS สำหรับจัดรูปแบบหน้าเว็บ */
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background-color: #eef2f7; /* สีพื้นหลังอ่อน ๆ */
+            color: #333; /* สีตัวอักษรหลัก */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh; /* ความสูงขั้นต่ำเต็มหน้าจอ */
+        }
+        .container { 
+            background-color: #ffffff; /* สีพื้นหลังของกล่องเนื้อหา */
+            padding: 30px; 
+            border-radius: 12px; /* ขอบโค้งมน */
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1); /* เงา */
+            max-width: 900px; 
+            width: 100%;
+            margin: 20px auto; /* จัดกึ่งกลาง */
+            border: 1px solid #e0e0e0;
+        }
+        h1 { 
+            text-align: center; 
+            color: #2c3e50; 
+            margin-bottom: 30px; 
+            font-size: 2.2em; /* ขนาดใหญ่ขึ้น */
+            border-bottom: 2px solid #3498db; /* เส้นใต้สีฟ้า */
+            padding-bottom: 10px;
+        }
+        h2 { 
+            color: #34495e; 
+            margin-top: 30px; 
+            margin-bottom: 20px; 
+            font-size: 1.6em;
+            border-left: 5px solid #3498db; /* เส้นซ้ายสีฟ้า */
+            padding-left: 10px;
+        }
+        h3 {
+            color: #2980b9;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        label { 
+            display: block; /* ให้ label อยู่บรรทัดใหม่ */
+            margin-bottom: 8px; 
+            font-weight: bold; 
+            color: #555;
+        }
+        input[type="number"], 
+        input[type="text"] { 
+            width: calc(100% - 24px); /* กำหนดความกว้างเต็มที่แต่หัก padding ออก */
+            padding: 12px; 
+            margin-bottom: 20px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            font-size: 1em;
+            box-sizing: border-box; /* ให้ padding ไม่เพิ่มความกว้างรวม */
+            transition: border-color 0.3s; /* ใส่ animation ตอน hover */
+        }
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            border-color: #3498db; /* สีเส้นขอบเมื่อ focus */
+            outline: none; /* ลบเส้น outline default */
+        }
+        button { 
+            background-color: #28a745; /* สีเขียว */
+            color: white; 
+            padding: 12px 25px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease; /* animation ตอน hover */
+            margin-top: 10px;
+            display: inline-block;
+        }
+        button:hover { 
+            background-color: #218838; /* สีเขียวเข้มขึ้น */
+        }
+        button#addActivity { /* ปุ่มเพิ่มกิจกรรม */
+            background-color: #007bff; /* สีฟ้า */
+            margin-right: 10px;
+        }
+        button#addActivity:hover { 
+            background-color: #0056b3; /* สีฟ้าเข้มขึ้น */
+        }
+        .activity-input { /* กล่องสำหรับแต่ละกิจกรรมย่อย */
+            border: 1px solid #e0e0e0; 
+            padding: 20px; 
+            margin-bottom: 15px; 
+            border-radius: 8px; 
+            background-color: #f8faff; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .error { /* กล่องแสดงข้อผิดพลาด */
+            color: #dc3545; /* สีแดง */
+            font-weight: bold; 
+            margin-bottom: 20px; 
+            padding: 10px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span style="color: #3498db;">&lt;/&gt;</span> โปรแกรมจัดวางพื้นที่</h1>
+
+        {% if error %} {# แสดงข้อผิดพลาดถ้ามี #}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST" action="/"> {# ฟอร์มสำหรับส่งข้อมูลไปยัง Flask App #}
+            <h2>ตั้งค่าขนาดพื้นที่ทั้งหมด</h2>
+            <div class="form-group">
+                <label for="board_width">ความกว้างของพื้นที่ทั้งหมด (หน่วย):</label>
+                <input type="number" id="board_width" name="board_width" required value="20" min="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="board_height">ความยาวของพื้นที่ทั้งหมด (หน่วย):</label>
+                <input type="number" id="board_height" name="board_height" required value="20" min="1">
+            </div>
+
+            <h2>ตั้งค่าพื้นที่ย่อย</h2>
+            <div class="form-group">
+                <label for="num_activities">จำนวนพื้นที่ย่อยที่ต้องการแบ่ง:</label>
+                <input type="number" id="num_activities" name="num_activities" required value="3" min="1" onchange="generateActivityInputs()">
+            </div>
+
+            <div id="activityInputs">
+                </div>
+
+            <button type="button" id="addActivity" onclick="addActivityInput()">+ เพิ่มพื้นที่ย่อย</button>
+
+            <h2>ตั้งค่าการจำลอง</h2>
+            <div class="form-group">
+                <label for="num_simulations">จำนวนรูปแบบการจัดวางที่ไม่ซ้ำกันที่ต้องการสร้าง:</label>
+                <input type="number" id="num_simulations" name="num_simulations" required value="3" min="1">
+            </div>
+
+            <button type="submit">สร้างรูปแบบการจัดวาง</button>
+        </form>
+    </div>
+
+    <script>
+        // JavaScript สำหรับจัดการการเพิ่ม/ลดช่องกิจกรรมย่อย
+        let activityCounter = 0; // เริ่มนับจาก 0 เพื่อให้ตรงกับ index ของ array ใน Python (0, 1, 2...)
+
+        // ฟังก์ชันสำหรับเพิ่มช่องป้อนข้อมูลกิจกรรมย่อยใหม่ 1 ชุด
+        function addActivityInput() {
+            activityCounter++; // เพิ่มจำนวนกิจกรรม
+            const activityInputsDiv = document.getElementById('activityInputs');
+            
+            const div = document.createElement('div');
+            div.className = 'activity-input'; // ใช้ class เพื่อจัดรูปแบบ
+            div.innerHTML = `
+                <h3>พื้นที่ย่อยที่ ${activityCounter}</h3>
+                <div class="form-group">
+                    <label for="activity_name_${activityCounter - 1}">ชื่อ:</label>
+                    <input type="text" id="activity_name_${activityCounter - 1}" name="activity_name_${activityCounter - 1}" required value="Activity${activityCounter}">
+                </div>
+                <div class="form-group">
+                    <label for="required_area_${activityCounter - 1}">ขนาดพื้นที่ (ตารางหน่วย):</label>
+                    <input type="number" id="required_area_${activityCounter - 1}" name="required_area_${activityCounter - 1}" required value="${10 + (activityCounter * 2)}" min="1">
+                </div>
+            `;
+            activityInputsDiv.appendChild(div); // เพิ่มลงใน DOM
+            updateNumActivitiesInput(); // อัปเดตค่าใน input 'จำนวนพื้นที่ย่อย'
+        }
+
+        // ฟังก์ชันสำหรับสร้างช่องป้อนข้อมูลกิจกรรมย่อยทั้งหมดตามจำนวนที่ระบุใน num_activities
+        function generateActivityInputs() {
+            const num = parseInt(document.getElementById('num_activities').value);
+            const activityInputsDiv = document.getElementById('activityInputs');
+            activityInputsDiv.innerHTML = ''; // ล้างช่อง input ที่มีอยู่เดิมออกไปก่อน
+            activityCounter = 0; // รีเซ็ตตัวนับกิจกรรม
+
+            for (let i = 0; i < num; i++) {
+                addActivityInput(); // เรียกเพิ่มกิจกรรมตามจำนวน
+            }
+        }
+
+        // ฟังก์ชันสำหรับอัปเดตค่าใน input 'จำนวนพื้นที่ย่อย' ให้ตรงกับจำนวนกิจกรรมปัจจุบัน
+        function updateNumActivitiesInput() {
+            document.getElementById('num_activities').value = activityCounter;
+        }
+
+        // สั่งให้สร้างช่อง input กิจกรรมเมื่อหน้าเว็บโหลดเสร็จครั้งแรก
+        document.addEventListener('DOMContentLoaded', generateActivityInputs);
+    </script>
+</body>
+</html>
