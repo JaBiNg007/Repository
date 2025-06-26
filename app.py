@@ -3,6 +3,7 @@ import matplotlib
 matplotlib.use('Agg') # <--- เพิ่มบรรทัดนี้
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+plt.rcParams['font.family'] = ['DejaVu Sans', 'sans-serif']
 import numpy as np
 import io
 import base64
@@ -128,8 +129,8 @@ app = Flask(__name__) # สร้าง Instance ของ Flask App
 
 # ฟังก์ชันสำหรับแปลง Matplotlib plot เป็น Base64 image เพื่อแสดงบนเว็บ
 def get_plot_as_base64_image(board_width, board_height, placed_activities_info, simulation_num, total_area_covered):
-    fig, ax = plt.subplots(1, figsize=(max(8, board_width * 0.5),
-                                        max(8, board_height * 0.5)))
+    fig, ax = plt.subplots(1, figsize=(max(8, board_width * 0.4),
+                                        max(8, board_height * 0.4)))
 
     ax.set_facecolor('lightgray')  
 
