@@ -2,14 +2,17 @@ from flask import Flask, render_template, request
 import matplotlib
 
 matplotlib.use('Agg')  # สำคัญ: ทำให้ Matplotlib วาดรูปเป็นข้อมูล ไม่ต้องเปิดหน้าต่าง GUI
+
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.font_manager as fm  # เพิ่ม: สำหรับจัดการฟอนต์ใน Matplotlib
 
 # ตั้งค่าฟอนต์สำหรับ Matplotlib (ตัวอย่าง)
 # เพื่อลด Warning และพยายามใช้ฟอนต์ที่ Render มี (ระบบ Linux)
+# หากต้องการแสดงผลภาษาไทยอย่างถูกต้อง ควรติดตั้งฟอนต์ที่ Render Server มี หรือติดตั้งฟอนต์ลงใน Build Process (ซึ่งซับซ้อน)
+# สำหรับตอนนี้ ใช้ฟอนต์พื้นฐานที่มักมีใน Linux หรือใช้ชื่อกิจกรรมเป็นภาษาอังกฤษ
 plt.rcParams['font.family'] = ['DejaVu Sans', 'sans-serif'] 
-# หากต้องการลองฟอนต์ไทยบางตัวที่อาจมีใน Linux Server (แต่ไม่การันตีว่า Render มีติดตั้งอยู่):
+# ตัวอย่างฟอนต์ไทยที่อาจมีในบาง Linux Server (ไม่การันตี Render มี):
 # plt.rcParams['font.family'] = ['TH Sarabun New', 'Loma', 'Norasi', 'Tlwg Typo', 'sans-serif']
 
 import numpy as np
