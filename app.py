@@ -227,7 +227,7 @@ def index():
                 return render_template('index.html', error="ค่าทั้งหมดต้องเป็นจำนวนเต็มบวก กรุณาป้อนใหม่")
 
             # --- เพิ่มส่วนนี้: กำหนดจำนวนแบบจำลองที่ไม่ซ้ำกันสูงสุด ---
-            MAX_UNIQUE_SIMULATIONS_CAP = 10 # กำหนดให้ได้สูงสุด 10 แบบจำลองที่ไม่ซ้ำกัน
+            MAX_UNIQUE_SIMULATIONS_CAP = 20 # กำหนดให้ได้สูงสุด 10 แบบจำลองที่ไม่ซ้ำกัน
             effective_num_simulations = min(num_simulations, MAX_UNIQUE_SIMULATIONS_CAP)
             # --------------------------------------------------------
 
