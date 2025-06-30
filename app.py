@@ -2,15 +2,12 @@ from flask import Flask, render_template, request
 import matplotlib
 
 matplotlib.use('Agg')  # สำคัญ: ทำให้ Matplotlib วาดรูปเป็นข้อมูล ไม่ต้องเปิดหน้าต่าง GUI
-
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.font_manager as fm  # เพิ่ม: สำหรับจัดการฟอนต์ใน Matplotlib
 
 # ตั้งค่าฟอนต์สำหรับ Matplotlib (ตัวอย่าง)
 # เพื่อลด Warning และพยายามใช้ฟอนต์ที่ Render มี (ระบบ Linux)
-# หากต้องการแสดงผลภาษาไทยอย่างถูกต้อง ควรติดตั้งฟอนต์ที่ Render Server มี หรือติดตั้งฟอนต์ลงใน Build Process (ซึ่งซับซ้อน)
-# สำหรับตอนนี้ ใช้ฟอนต์พื้นฐานที่มักมีใน Linux หรือใช้ชื่อกิจกรรมเป็นภาษาอังกฤษ
 plt.rcParams['font.family'] = ['DejaVu Sans', 'sans-serif'] 
 # ตัวอย่างฟอนต์ไทยที่อาจมีในบาง Linux Server (ไม่การันตี Render มี):
 # plt.rcParams['font.family'] = ['TH Sarabun New', 'Loma', 'Norasi', 'Tlwg Typo', 'sans-serif']
@@ -149,8 +146,7 @@ app = Flask(__name__)  # สร้าง Instance ของ Flask App
 # ฟังก์ชันสำหรับแปลง Matplotlib plot เป็น Base64 image เพื่อแสดงบนเว็บ
 def get_plot_as_base64_image(board_width, board_height, placed_activities_info, simulation_num, total_area_covered):
     # ปรับปรุงประสิทธิภาพ: กำหนดขนาดรูปภาพให้คงที่และเล็ก (เพื่อประหยัด RAM)
-    # fig, ax = plt.subplots(1, figsize=(max(8, board_width * 0.5), max(8, board_height * 0.5))) # บรรทัดเก่า
-    fig, ax = plt.subplots(1, figsize=(8, 8)) # เปลี่ยนเป็นขนาดคงที่ 8x8 (หรือ 6,6 ถ้ายัง Out of Memory)
+    fig, ax = plt.subplots(1, figsize=(6, 6)) # เปลี่ยนเป็นขนาดคงที่ 6x6 นิ้ว เพื่อประหยัด RAM สูงสุด
 
     ax.set_facecolor('lightgray')
 
@@ -225,7 +221,12 @@ def index():
 
             # ตรวจสอบความถูกต้องของข้อมูลเบื้องต้น
             if board_width <= 0 or board_height <= 0 or num_activities <= 0 or num_simulations <= 0:
-                return render_template('index.html', error="ค่าทั้งหมดต้องเป็นจำนวนเต็มบวก กรุณาลองใหม่")
+                return render_template('index.html', error="ค่าทั้งหมดต้องเป็นจำนวนเต็มบวก กรุณาป้อนใหม่")
+
+            # --- เพิ่มส่วนนี้: กำหนดจำนวนแบบจำลองที่ไม่ซ้ำกันสูงสุด ---
+            MAX_UNIQUE_SIMULATIONS_CAP = 10 # กำหนดให้ได้สูงสุด 10 แบบจำลองที่ไม่ซ้ำกัน
+            effective_num_simulations = min(num_simulations, MAX_UNIQUE_SIMULATIONS_CAP)
+            # --------------------------------------------------------
 
             original_activities_list = []
             total_required_area = 0
@@ -265,10 +266,12 @@ def index():
             simulation_attempt_num = 0
 
             # กำหนดจำนวนครั้งที่พยายามสูงสุด เพื่อป้องกันการวนลูปไม่รู้จบหากหาคำตอบยาก
-            MAX_ATTEMPTS = min(num_simulations * 50, 500) # ปรับปรุงประสิทธิภาพ: จำกัดจำนวนครั้งที่พยายาม
+            # เราใช้ effective_num_simulations ในการคำนวณ MAX_ATTEMPTS
+            MAX_ATTEMPTS = min(effective_num_simulations * 100, 2000) # ปรับปรุงประสิทธิภาพ: จำกัดจำนวนครั้งที่พยายาม
 
             # เริ่มวนลูปเพื่อสร้างรูปแบบการจัดวางที่ไม่ซ้ำกันตามจำนวนที่ต้องการ
-            while successful_simulations_count < num_simulations and simulation_attempt_num < MAX_ATTEMPTS:
+            # โดยใช้ effective_num_simulations เป็นเป้าหมาย
+            while successful_simulations_count < effective_num_simulations and simulation_attempt_num < MAX_ATTEMPTS:
                 simulation_attempt_num += 1
 
                 # สร้าง Activity object ชุดใหม่สำหรับแต่ละการพยายาม เพื่อให้สามารถสุ่มลำดับการจัดวางและตำแหน่งได้ใหม่ทุกครั้ง
@@ -310,7 +313,7 @@ def index():
                         })
 
                 # ออกจากลูปหากได้จำนวนรูปแบบที่ไม่ซ้ำกันครบตามต้องการแล้ว
-                if successful_simulations_count >= num_simulations:
+                if successful_simulations_count >= effective_num_simulations: # ใช้ effective_num_simulations ที่ถูกจำกัดแล้ว
                     break
 
             # ส่งข้อมูลทั้งหมดไปแสดงผลในหน้า results.html
