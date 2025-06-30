@@ -2,12 +2,14 @@ from flask import Flask, render_template, request
 import matplotlib
 
 matplotlib.use('Agg')  # สำคัญ: ทำให้ Matplotlib วาดรูปเป็นข้อมูล ไม่ต้องเปิดหน้าต่าง GUI
+
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.font_manager as fm  # เพิ่ม: สำหรับจัดการฟอนต์ใน Matplotlib
 
 # ตั้งค่าฟอนต์สำหรับ Matplotlib (ตัวอย่าง)
 # เพื่อลด Warning และพยายามใช้ฟอนต์ที่ Render มี (ระบบ Linux)
+# หากต้องการแสดงผลภาษาไทยอย่างถูกต้อง ควรติดตั้งฟอนต์ที่ Render Server มี หรือใช้ชื่อกิจกรรมเป็นภาษาอังกฤษ
 plt.rcParams['font.family'] = ['DejaVu Sans', 'sans-serif'] 
 # ตัวอย่างฟอนต์ไทยที่อาจมีในบาง Linux Server (ไม่การันตี Render มี):
 # plt.rcParams['font.family'] = ['TH Sarabun New', 'Loma', 'Norasi', 'Tlwg Typo', 'sans-serif']
@@ -94,9 +96,10 @@ def solve_packing_with_variety_and_rotation(board_width, board_height, activitie
         new_activity.color = orig_activity.color
         current_attempt_activities.append(new_activity)
 
-    # ปรับปรุงประสิทธิภาพ: เรียงกิจกรรมตามพื้นที่มากสุดไปน้อยสุด เพื่อให้วางกิจกรรมใหญ่ก่อน (First-Fit Decreasing heuristic)
+    # ปรับปรุงประสิทธิภาพ: เรียงกิจกรรมตามพื้นที่มากสุดไปน้อยสุด (First-Fit Decreasing heuristic)
     current_attempt_activities.sort(key=lambda a: a.required_area, reverse=True) 
-    # random.shuffle(current_attempt_activities) # ลบการสุ่มลำดับกิจกรรมเดิมออก
+    # เพิ่มความหลากหลาย: สุ่มลำดับกิจกรรมในแต่ละการพยายาม
+    random.shuffle(current_attempt_activities) # <--- เพิ่มบรรทัดนี้กลับเข้าไป เพื่อให้ได้แบบจำลองที่หลากหลายขึ้น
 
     for activity in current_attempt_activities:
         placed = False
@@ -107,13 +110,13 @@ def solve_packing_with_variety_and_rotation(board_width, board_height, activitie
             if dim_w != dim_h:
                 all_possible_orientations.append((dim_h, dim_w))
 
-        # random.shuffle(all_possible_orientations) # ลบการสุ่มลำดับรูปทรงออก
+        # random.shuffle(all_possible_orientations) # ตรงนี้ยังคงคอมเมนต์ไว้ก่อน เพื่อไม่ให้สุ่มมากเกินไปจนหาคำตอบยาก
 
         all_possible_positions = []
         for y in range(board_height):
             for x in range(board_width):
                 all_possible_positions.append((x, y))
-        # random.shuffle(all_possible_positions) # ลบการสุ่มลำดับตำแหน่งออก
+        # random.shuffle(all_possible_positions) # ตรงนี้ยังคงคอมเมนต์ไว้ก่อน
 
         for dim_w, dim_h in all_possible_orientations:
             for x, y in all_possible_positions: # ลูปนี้จะวนจาก 0,0 ไปเรื่อยๆ อย่างเป็นระบบ
@@ -267,7 +270,8 @@ def index():
 
             # กำหนดจำนวนครั้งที่พยายามสูงสุด เพื่อป้องกันการวนลูปไม่รู้จบหากหาคำตอบยาก
             # เราใช้ effective_num_simulations ในการคำนวณ MAX_ATTEMPTS
-            MAX_ATTEMPTS = min(effective_num_simulations * 100, 2000) # ปรับปรุงประสิทธิภาพ: จำกัดจำนวนครั้งที่พยายาม
+            # ปรับปรุงประสิทธิภาพ: เพิ่มโอกาสในการค้นหาแบบจำลองที่ไม่ซ้ำกัน
+            MAX_ATTEMPTS = min(effective_num_simulations * 100, 2000) # เพิ่มตัวคูณและขีดจำกัดสูงสุด
 
             # เริ่มวนลูปเพื่อสร้างรูปแบบการจัดวางที่ไม่ซ้ำกันตามจำนวนที่ต้องการ
             # โดยใช้ effective_num_simulations เป็นเป้าหมาย
