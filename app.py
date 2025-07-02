@@ -226,18 +226,8 @@ def index():
             if board_width <= 0 or board_height <= 0 or num_activities <= 0 or num_simulations <= 0:
                 return render_template('index.html', error="ค่าทั้งหมดต้องเป็นจำนวนเต็มบวก กรุณาป้อนใหม่")
 
-            # --- เพิ่มส่วนนี้: การตรวจสอบโจทย์ที่ซับซ้อนเกินไป (Frontend Validation) ---
-            # กำหนดเกณฑ์คร่าวๆ ที่ถือว่าโจทย์ยากสำหรับ Starter Tier
-            MAX_BOARD_AREA_FOR_STARTER = 1000 # เช่น บอร์ด 30x30 = 900
-            MAX_ACTIVITIES_FOR_STARTER = 8    # เช่น ไม่เกิน 8 กิจกรรม
-            
-            if (board_width * board_height > MAX_BOARD_AREA_FOR_STARTER) or \
-               (num_activities > MAX_ACTIVITIES_FOR_STARTER):
-                return render_template('index.html', error="โจทย์นี้ซับซ้อนเกินไปสำหรับแผนบริการปัจจุบัน กรุณาลองลดขนาดบอร์ดหรือจำนวนพื้นที่ย่อย")
-            # ----------------------------------------------------
-
             # --- เพิ่มส่วนนี้: กำหนดจำนวนแบบจำลองที่ไม่ซ้ำกันสูงสุด ---
-            MAX_UNIQUE_SIMULATIONS_CAP = 10 # กำหนดให้ได้สูงสุด 10 แบบจำลองที่ไม่ซ้ำกัน
+            MAX_UNIQUE_SIMULATIONS_CAP = 20 # กำหนดให้ได้สูงสุด 10 แบบจำลองที่ไม่ซ้ำกัน
             effective_num_simulations = min(num_simulations, MAX_UNIQUE_SIMULATIONS_CAP)
             # --------------------------------------------------------
 
@@ -309,7 +299,7 @@ def index():
 
                         # สร้างรูปภาพ Matplotlib และแปลงเป็น Base64 string
                         plot_image = get_plot_as_base64_image(board_width, board_height, placed_info,
-                                                              successful_simulations_count, total_area_covered)
+                                                              successful_simulations_count, total_required_area)
 
                         # เตรียมรายละเอียดกิจกรรมเพื่อแสดงบนหน้าเว็บ
                         activity_details = []
