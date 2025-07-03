@@ -24,87 +24,56 @@ import hashlib
 
 # --- คลาสและฟังก์ชันหลักของโปรแกรมจัดวางพื้นที่ ---
 class Activity:
-    """
-    คลาสสำหรับเก็บข้อมูลของแต่ละกิจกรรม (พื้นที่ย่อย)
-    """
     def __init__(self, name, required_area, possible_dimensions):
         self.name = name
         self.required_area = required_area
         self.possible_dimensions = possible_dimensions
-        self.placed_dim = None  # (width, height) มิติที่ถูกวางจริง
-        self.position = None    # (x, y) ตำแหน่งมุมซ้ายบนที่ถูกวางจริง
-        self.color = None       # สีสำหรับแสดงผลในกราฟ
+        self.placed_dim = None
+        self.position = None
+        self.color = None
 
     def __repr__(self):
-        """กำหนดรูปแบบการแสดงผลของอ็อบเจกต์กิจกรรม"""
-        if self.placed_dim:
-            return f"{self.name}({self.placed_dim[0]}x{self.placed_dim[1]})"
-        else:
-            return f"{self.name}(Area:{self.required_area})"
+        return f"{self.name}({self.placed_dim[0]}x{self.placed_dim[1]})" if self.placed_dim else f"{self.name}(Area:{self.required_area})"
 
 
 def get_possible_dimensions_for_area(area):
-    """
-    ค้นหาคู่ของจำนวนเต็ม (ความกว้าง, ความยาว) ทั้งหมด ที่คูณกันแล้วได้ค่าพื้นที่ที่กำหนด
-    รวมถึงรูปแบบที่หมุน 90 องศา เพื่อประสิทธิภาพจะวนลูปถึงแค่ค่ารากที่สองของ area
-    """
     dimensions = []
     for i in range(1, int(math.sqrt(area)) + 1):
-        if area % i == 0:  # ถ้า area หารด้วย i ลงตัว แสดงว่า i เป็นตัวประกอบ
+        if area % i == 0:
             w1 = i
             h1 = area // i
             dimensions.append((w1, h1))
-            if w1 != h1:  # ถ้าไม่ใช่สี่เหลี่ยมจัตุรัส ให้เพิ่มรูปแบบที่หมุนแล้วด้วย
+            if w1 != h1:
                 dimensions.append((h1, w1))
-    # คืนค่าลิสต์ของมิติที่จัดเรียงและไม่มีค่าซ้ำกัน
     return sorted(list(set(dimensions)))
 
 
 def create_board(width, height):
-    """
-    สร้างโครงสร้างของบอร์ด (พื้นที่หลัก) เปล่าๆ ในรูปของ NumPy array
-    """
     return np.full((height, width), '.', dtype='<U10')
 
 
 def can_place(board, width, height, x, y):
-    """
-    ตรวจสอบว่ากิจกรรมสามารถวางที่ตำแหน่ง (x,y) ด้วยมิติที่กำหนดได้หรือไม่
-    โดยตรวจสอบไม่ให้ชนขอบบอร์ดหรือทับซ้อนกับกิจกรรมอื่น
-    """
     board_h, board_w = board.shape
-
-    # ตรวจสอบการชนขอบบอร์ด (Boundary Check)
     if x < 0 or y < 0 or x + width > board_w or y + height > board_h:
         return False
-
-    # ตรวจสอบการทับซ้อน (Overlap Check)
     for r in range(y, y + height):
         for c in range(x, x + width):
-            if board[r, c] != '.':  # หากพบว่าเซลล์ไม่ว่าง (มีกิจกรรมอื่นอยู่)
+            if board[r, c] != '.':
                 return False
-    return True  # ถ้าผ่านทุกการตรวจสอบ ถือว่าวางได้
+    return True
 
 
 def place_activity(board, activity, x, y, width, height):
-    """
-    ทำการ "วาง" กิจกรรมลงบนบอร์ดจริง และบันทึกข้อมูลการวางลงในอ็อบเจกต์กิจกรรม
-    """
     for r in range(y, y + height):
         for c in range(x, x + width):
-            board[r, c] = activity.name  # เขียนชื่อกิจกรรมลงบนเซลล์บอร์ด
+            board[r, c] = activity.name
     activity.placed_dim = (width, height)
     activity.position = (x, y)
     return True
 
 
 def calculate_layout_fingerprint(placed_activities_info):
-    """
-    สร้าง "ลายพิมพ์" (Fingerprint) ที่ไม่ซ้ำกันสำหรับรูปแบบการจัดวางที่สำเร็จ
-    เพื่อใช้ตรวจสอบว่า Layout นั้นซ้ำกับที่เคยเจอแล้วหรือไม่
-    """
     fingerprint_data = []
-    # จัดเรียงข้อมูลกิจกรรมที่วางแล้วตามเกณฑ์ที่แน่นอน เพื่อให้ลายพิมพ์ไม่เปลี่ยนแม้ลำดับการวางจะต่างกัน
     sorted_info = sorted(placed_activities_info,
                          key=lambda info: (info['position'][0], info['position'][1], info['placed_dimensions'][0],
                                            info['placed_dimensions'][1], info['name']))
@@ -114,15 +83,10 @@ def calculate_layout_fingerprint(placed_activities_info):
             (info['name'], info['placed_dimensions'][0], info['placed_dimensions'][1], info['position'][0],
              info['position'][1])
         )
-    # คำนวณค่าแฮช SHA256 จากข้อมูลที่จัดเรียงแล้ว
     return hashlib.sha256(str(fingerprint_data).encode('utf-8')).hexdigest()
 
 
 def solve_packing_with_variety_and_rotation(board_width, board_height, activities_input_list):
-    """
-    อัลกอริทึมหลักในการพยายามหาแบบจำลองการจัดวางกิจกรรมทั้งหมดลงบนบอร์ด
-    ให้ได้ตามจำนวนที่ไม่ซ้ำกันที่ต้องการ โดยเน้นประสิทธิภาพและความหลากหลาย
-    """
     board = create_board(board_width, board_height)
     placed_activities_info = []
 
@@ -146,17 +110,16 @@ def solve_packing_with_variety_and_rotation(board_width, board_height, activitie
             if dim_w != dim_h:
                 all_possible_orientations.append((dim_h, dim_w))
 
-        # random.shuffle(all_possible_orientations) # ไม่ได้ใช้ เพื่อไม่ให้สุ่มมากเกินไปจนหาคำตอบยาก
+        # random.shuffle(all_possible_orientations) # ตรงนี้ยังคงคอมเมนต์ไว้ก่อน เพื่อไม่ให้สุ่มมากเกินไปจนหาคำตอบยาก
 
         all_possible_positions = []
         for y in range(board_height):
             for x in range(board_width):
                 all_possible_positions.append((x, y))
-        # random.shuffle(all_possible_positions) # ไม่ได้ใช้ เพื่อไม่ให้สุ่มมากเกินไปจนหาคำตอบยาก
+        # random.shuffle(all_possible_positions) # ตรงนี้ยังคงคอมเมนต์ไว้ก่อน
 
-        # วนลูปผ่านรูปทรงที่เป็นไปได้ และตำแหน่งที่เป็นไปได้ (จาก 0,0 ไปเรื่อยๆ อย่างเป็นระบบ)
         for dim_w, dim_h in all_possible_orientations:
-            for x, y in all_possible_positions: 
+            for x, y in all_possible_positions: # ลูปนี้จะวนจาก 0,0 ไปเรื่อยๆ อย่างเป็นระบบ
                 if can_place(board, dim_w, dim_h, x, y):
                     place_activity(board, activity, x, y, dim_w, dim_h)
                     placed_activities_info.append({
@@ -166,16 +129,16 @@ def solve_packing_with_variety_and_rotation(board_width, board_height, activitie
                         "color": activity.color
                     })
                     placed = True
-                    break  # วางกิจกรรมปัจจุบันได้แล้ว ออกจากลูปตำแหน่งและรูปทรง
-                if placed: # ตรวจสอบอีกครั้งเพื่อออกจากลูปรูปทรง
                     break
-            if placed: # ตรวจสอบอีกครั้งเพื่อออกจากลูปกิจกรรม
+                if placed:
+                    break
+            if placed:
                 break
 
-        if not placed: # หากวางกิจกรรมชิ้นนี้ไม่ได้เลยในทุกรูปแบบและตำแหน่ง
-            return None, None  # ถือว่าการพยายามครั้งนี้ล้มเหลว
+        if not placed:
+            return None, None
 
-    return board, placed_activities_info  # คืนผลลัพธ์เมื่อวางกิจกรรมได้ครบทุกชิ้น
+    return board, placed_activities_info
 
 
 # --- สิ้นสุดส่วนคลาสและฟังก์ชันหลัก ---
@@ -185,18 +148,14 @@ app = Flask(__name__)  # สร้าง Instance ของ Flask App
 
 # ฟังก์ชันสำหรับแปลง Matplotlib plot เป็น Base64 image เพื่อแสดงบนเว็บ
 def get_plot_as_base64_image(board_width, board_height, placed_activities_info, simulation_num, total_area_covered):
-    """
-    สร้างรูปภาพแผนผังการจัดวางด้วย Matplotlib และแปลงเป็นข้อมูล Base64 เพื่อแสดงบนหน้าเว็บ
-    """
     # ปรับปรุงประสิทธิภาพ: กำหนดขนาดรูปภาพให้คงที่และเล็ก (เพื่อประหยัด RAM)
-    fig, ax = plt.subplots(1, figsize=(6, 6)) # เปลี่ยนเป็นขนาดคงที่ 6x6 นิ้ว เพื่อประหยัด RAM สูงสุด
+    fig, ax = plt.subplots(1, figsize=(4, 4)) # เปลี่ยนเป็นขนาดคงที่ 4x4 นิ้ว เพื่อประหยัด RAM สูงสุด
 
     ax.set_facecolor('lightgray')
 
     ax.add_patch(patches.Rectangle((0, 0), board_width, board_height,
                                    edgecolor='black', facecolor='white', linewidth=2))
 
-    # วาดเส้นกริดถ้าบอร์ดมีขนาดไม่เกิน 20x20 เพื่อความชัดเจน
     if board_width <= 20 and board_height <= 20:
         ax.set_xticks(np.arange(0, board_width + 1, 1))
         ax.set_yticks(np.arange(0, board_height + 1, 1))
@@ -228,14 +187,14 @@ def get_plot_as_base64_image(board_width, board_height, placed_activities_info, 
             va='center',
             color='white',
             fontsize=min(12, max(6, (width * height) ** 0.3 * 0.8)),
-            # fontweight='bold' # ถูกลบออกเพื่อลดปัญหาฟอนต์
+            # fontweight='bold' # ลบออกเพื่อลดปัญหาฟอนต์ หรือเปลี่ยนเป็น 'normal'
         )
 
     ax.set_xlim(0, board_width)
     ax.set_ylim(0, board_height)
     ax.set_aspect('equal', adjustable='box')
 
-    plt.gca().invert_yaxis() # กลับแกน Y เพื่อให้ (0,0) อยู่มุมซ้ายบนเหมือนตาราง
+    plt.gca().invert_yaxis()
 
     plt.title(
         f'Simulation #{simulation_num}: Board {board_width}x{board_height} | Covered: {total_area_covered} ตร.หน่วย')
@@ -246,7 +205,7 @@ def get_plot_as_base64_image(board_width, board_height, placed_activities_info, 
     buf = io.BytesIO()
     plt.savefig(buf, format='png', bbox_inches='tight')
     buf.seek(0)
-    plt.close(fig)  # สำคัญมาก! ปิด Figure เพื่อคืนหน่วยความจำ
+    plt.close(fig)  # ปิด figure เพื่อไม่ให้ใช้หน่วยความจำเกินจำเป็น
 
     image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
     return image_base64
@@ -255,9 +214,6 @@ def get_plot_as_base64_image(board_width, board_height, placed_activities_info, 
 # กำหนด Route สำหรับหน้าแรกของเว็บ "/"
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    """
-    จัดการการทำงานของหน้าเว็บหลัก รับข้อมูลจากฟอร์ม, ประมวลผล, และแสดงผลลัพธ์
-    """
     if request.method == 'POST':  # ถ้าเป็นการส่งข้อมูลจากฟอร์ม (Submit)
         try:
             # ดึงข้อมูลจากฟอร์มที่ผู้ใช้กรอก
@@ -270,18 +226,8 @@ def index():
             if board_width <= 0 or board_height <= 0 or num_activities <= 0 or num_simulations <= 0:
                 return render_template('index.html', error="ค่าทั้งหมดต้องเป็นจำนวนเต็มบวก กรุณาป้อนใหม่")
 
-            # --- การตรวจสอบโจทย์ที่ซับซ้อนเกินไป (Input Validation) ---
-            # กำหนดเกณฑ์คร่าวๆ ที่ถือว่าโจทย์ยากสำหรับ Starter Tier
-            MAX_BOARD_AREA_FOR_STARTER = 1000 # เช่น บอร์ด 30x30 = 900
-            MAX_ACTIVITIES_FOR_STARTER = 8    # เช่น ไม่เกิน 8 กิจกรรม
-            
-            if (board_width * board_height > MAX_BOARD_AREA_FOR_STARTER) or \
-               (num_activities > MAX_ACTIVITIES_FOR_STARTER):
-                return render_template('index.html', error="โจทย์นี้ซับซ้อนเกินไปสำหรับแผนบริการปัจจุบัน กรุณาลองลดขนาดบอร์ดหรือจำนวนพื้นที่ย่อย")
-            # ----------------------------------------------------
-
-            # --- กำหนดจำนวนแบบจำลองที่ไม่ซ้ำกันสูงสุดที่จะแสดงผล ---
-            MAX_UNIQUE_SIMULATIONS_CAP = 20 # กำหนดให้ได้สูงสุด 20 แบบจำลองที่ไม่ซ้ำกัน
+            # --- เพิ่มส่วนนี้: กำหนดจำนวนแบบจำลองที่ไม่ซ้ำกันสูงสุด ---
+            MAX_UNIQUE_SIMULATIONS_CAP = 20 # กำหนดให้ได้สูงสุด 10 แบบจำลองที่ไม่ซ้ำกัน
             effective_num_simulations = min(num_simulations, MAX_UNIQUE_SIMULATIONS_CAP)
             # --------------------------------------------------------
 
@@ -323,7 +269,7 @@ def index():
             simulation_attempt_num = 0
 
             # กำหนดจำนวนครั้งที่พยายามสูงสุด เพื่อป้องกันการวนลูปไม่รู้จบหากหาคำตอบยาก
-            # ใช้ effective_num_simulations ในการคำนวณ MAX_ATTEMPTS
+            # เราใช้ effective_num_simulations ในการคำนวณ MAX_ATTEMPTS
             # ปรับปรุงประสิทธิภาพ: เพิ่มโอกาสในการค้นหาแบบจำลองที่ไม่ซ้ำกัน
             MAX_ATTEMPTS = min(effective_num_simulations * 100, 2000) # เพิ่มตัวคูณและขีดจำกัดสูงสุด
 
@@ -371,20 +317,17 @@ def index():
                         })
 
                 # ออกจากลูปหากได้จำนวนรูปแบบที่ไม่ซ้ำกันครบตามต้องการแล้ว
-                if successful_simulations_count >= effective_num_simulations: 
+                if successful_simulations_count >= effective_num_simulations: # ใช้ effective_num_simulations ที่ถูกจำกัดแล้ว
                     break
 
             # ส่งข้อมูลทั้งหมดไปแสดงผลในหน้า results.html
             return render_template('results.html',
                                    results=results,
                                    total_attempts=simulation_attempt_num,
-                                   total_unique=successful_simulations_count, # แก้ไข: ให้ total_unique สอดคล้องกับจำนวนผลลัพธ์ที่แสดงจริง
+                                   total_unique=len(generated_fingerprints),
                                    board_width=board_width,
                                    board_height=board_height,
-                                   total_required_area=total_required_area,
-                                   percentage_covered=percentage_covered, # เพิ่มตัวแปรนี้เข้าไปใน render_template
-                                   empty_cells_count=empty_cells_count # เพิ่มตัวแปรนี้เข้าไปใน render_template
-                                   )
+                                   total_required_area=total_required_area)
 
         except Exception as e:  # ดักจับข้อผิดพลาดทั่วไป
             # หากเกิดข้อผิดพลาด ให้กลับไปหน้าแรกพร้อมแสดงข้อความผิดพลาด
@@ -398,5 +341,4 @@ def index():
 # ส่วนนี้จะรันเมื่อเราเรียกใช้ไฟล์ app.py โดยตรง
 if __name__ == '__main__':
     app.run(
-        debug=False)  # debug=True จะช่วยให้เห็นข้อผิดพลาดได้ง่ายขึ้น และเว็บจะรีโหลดอัตโนมัติเมื่อโค้ดมีการเปลี่ยนแปลง
-    # เมื่อจะนำไปใช้งานจริง (Production) ควรเปลี่ยนเป็น debug=False เพื่อความปลอดภัยและประสิทธิภาพ ```
+        debug=False)  # <--- เปลี่ยนจาก debug=True เป็น debug=False สำหรับ Production	
