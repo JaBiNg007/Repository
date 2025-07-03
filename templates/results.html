@@ -179,16 +179,16 @@
         {% endif %}
 
         {% if not results %}
-            <div class="info-box" style="background-color: #ffebee; color: #d32f2f; border-color: #ffcdd2;">
+            <div class="info-box" style="background-color: #ffebee; color: #d32f2f; border-color: #ffcdd2;\">
                 <p>ไม่สามารถสร้างรูปแบบที่ไม่ซ้ำกันได้สำเร็จตามจำนวนที่ต้องการ กรุณาลองปรับขนาดพื้นที่หรือกิจกรรมแล้วลองใหม่อีกครั้ง</p>
             </div>
         {% endif %}
 
         {% for result in results %}
-            <div class="result-block">
+            <div class=\"result-block\">
                 <h2>รูปแบบที่ #{{ result.simulation_number }} (ความพยายามครั้งที่ {{ result.attempt_number }})</h2>
                 <h3>การแสดงผลการจัดวาง:</h3>
-                <img src="data:image/png;base64,{{ result.plot_image }}" alt="Layout Visualization">
+                <img src=\"data:image/png;base64,{{ result.plot_image }}\" alt=\"Layout Visualization\">
                 
                 <h3>Activity Details:</h3>
                 <ul>
@@ -199,7 +199,7 @@
             </div>
         {% endfor %}
 
-        <a href="/" class="back-button">← กลับไปยังหน้าป้อนข้อมูล</a>
+        <a href=\"/\" class=\"back-button\">← กลับไปยังหน้าป้อนข้อมูล</a>
     </div>
 </body>
 </html>
