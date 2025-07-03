@@ -154,22 +154,15 @@
         <h1><span style="color: #3498db;">&#10003;</span> ผลลัพธ์การจัดวางพื้นที่</h1>
 
         <div class="summary-info">
-            <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
-                <div class="summary-metric">
-                    <p>พื้นที่ทั้งหมด: <span>{{ board_width }}x{{ board_height }} = {{ board_width * board_height }}</span> ตร.หน่วย</p>
-                    <p>พื้นที่รวมที่ต้องการ: <span>{{ total_required_area }}</span> ตร.หน่วย</p>
-                </div>
-                <div class="summary-metric">
-                    <p>เปอร์เซ็นต์พื้นที่ที่ถูกใช้งาน: <span>{{ "%.2f" | format(percentage_covered) }}%</span></p>
-                    <p>จำนวนเซลล์ว่างที่เหลือ: <span>{{ empty_cells_count }}</span> ตร.หน่วย</p>
-                </div>
-            </div>
+            <p>พื้นที่ทั้งหมด: <span>{{ board_width }}x{{ board_height }} = {{ board_width * board_height }}</span> ตร.หน่วย</p>
+            <p>พื้นที่รวมที่ต้องการ: <span>{{ total_required_area }}</span> ตร.หน่วย</p>
+            {# ลบเปอร์เซ็นต์และจำนวนเซลล์ว่างตามคำขอ #}
+            {# <p>เปอร์เซ็นต์พื้นที่ที่ถูกใช้งาน: <span>{{ "%.2f" | format(percentage_covered) }}%</span></p> #}
+            {# <p>จำนวนเซลล์ว่างที่เหลือ: <span>{{ empty_cells_count }}</span> ตร.หน่วย</p> #}
             <hr style="border-top: 1px solid #ddd; margin: 15px auto; width: 80%;">
-            <div style="text-align: center;">
-                <p>สร้างรูปแบบไม่ซ้ำกันได้สำเร็จ: <strong>{{ results | length }}</strong> รูปแบบ (จากที่ต้องการสูงสุด {{ num_simulations }} รูปแบบ)</p>
-                <p>จำนวนครั้งที่พยายามทั้งหมด: <strong>{{ total_attempts }}</strong> ครั้ง</p>
-                <p>รูปแบบไม่ซ้ำกันที่พบในระหว่างกระบวนการ: <strong>{{ total_unique }}</strong> รูปแบบ</p>
-            </div>
+            <p>สร้างรูปแบบไม่ซ้ำกันได้สำเร็จ: <strong>{{ results | length }}</strong> รูปแบบ (จากที่ต้องการสูงสุด {{ num_simulations }} รูปแบบ)</p>
+            <p>จำนวนครั้งที่พยายามทั้งหมด: <strong>{{ total_attempts }}</strong> ครั้ง</p>
+            <p>รูปแบบไม่ซ้ำกันที่พบในระหว่างกระบวนการ: <strong>{{ total_unique }}</strong> รูปแบบ</p>
         </div>
 
         {% if total_required_area > board_width * board_height %}
@@ -179,16 +172,16 @@
         {% endif %}
 
         {% if not results %}
-            <div class="info-box" style="background-color: #ffebee; color: #d32f2f; border-color: #ffcdd2;\">
+            <div class="info-box" style="background-color: #ffebee; color: #d32f2f; border-color: #ffcdd2;">
                 <p>ไม่สามารถสร้างรูปแบบที่ไม่ซ้ำกันได้สำเร็จตามจำนวนที่ต้องการ กรุณาลองปรับขนาดพื้นที่หรือกิจกรรมแล้วลองใหม่อีกครั้ง</p>
             </div>
         {% endif %}
 
         {% for result in results %}
-            <div class=\"result-block\">
+            <div class="result-block">
                 <h2>รูปแบบที่ #{{ result.simulation_number }} (ความพยายามครั้งที่ {{ result.attempt_number }})</h2>
                 <h3>การแสดงผลการจัดวาง:</h3>
-                <img src=\"data:image/png;base64,{{ result.plot_image }}\" alt=\"Layout Visualization\">
+                <img src="data:image/png;base64,{{ result.plot_image }}" alt="Layout Visualization">
                 
                 <h3>Activity Details:</h3>
                 <ul>
@@ -199,7 +192,7 @@
             </div>
         {% endfor %}
 
-        <a href=\"/\" class=\"back-button\">← กลับไปยังหน้าป้อนข้อมูล</a>
+        <a href="/" class="back-button">← กลับไปยังหน้าป้อนข้อมูล</a>
     </div>
 </body>
 </html>
