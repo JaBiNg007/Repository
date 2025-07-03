@@ -6,7 +6,6 @@
     <title>ผลลัพธ์การจัดวาง</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS สำหรับจัดรูปแบบหน้าเว็บ */
         body { 
             font-family: 'Sarabun', sans-serif; 
             margin: 0; 
@@ -27,6 +26,9 @@
             width: 100%;
             margin: 20px auto;
             border: 1px solid #e0e0e0;
+        }
+        h1, h2, h3 { 
+            color: #333; 
         }
         h1 { 
             text-align: center; 
@@ -50,25 +52,25 @@
             margin-bottom: 15px;
             font-size: 1.2em;
         }
-        .info-box { /* กล่องข้อมูลทั่วไป/สรุป */
-            background-color: #e8f5e9; /* สีเขียวอ่อน */
-            color: #2e7d32; /* สีเขียวเข้ม */
+        .info-box {
+            background-color: #e8f5e9;
+            color: #2e7d32;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
             border: 1px solid #c8e6c9;
             font-weight: bold;
         }
-        .warning-box { /* กล่องข้อควรระวัง/เตือน */
-            background-color: #fffde7; /* สีเหลืองอ่อน */
-            color: #fbc02d; /* สีเหลืองเข้ม */
+        .warning-box {
+            background-color: #fffde7;
+            color: #fbc02d;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
             border: 1px solid #ffe082;
             font-weight: bold;
         }
-        .result-block { /* กล่องสำหรับแต่ละผลลัพธ์การจำลอง */
+        .result-block { 
             border: 1px solid #ddd; 
             padding: 20px; 
             margin-bottom: 25px; 
@@ -76,7 +78,7 @@
             background-color: #fdfdfd; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
-        img { /* รูปภาพแผนผัง */
+        img { 
             max-width: 100%; 
             height: auto; 
             display: block; 
@@ -85,7 +87,7 @@
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        ul { /* รายการรายละเอียดกิจกรรม */
+        ul { 
             list-style-type: none; 
             padding: 0; 
             margin-top: 15px;
@@ -95,7 +97,7 @@
             padding-left: 20px;
             position: relative;
         }
-        li::before { /* เพิ่ม bullet point แบบกำหนดเอง */
+        li::before {
             content: '•';
             color: #3498db;
             font-size: 1.2em;
@@ -103,11 +105,11 @@
             left: 0;
             top: 0;
         }
-        .back-button { /* ปุ่มย้อนกลับ */
+        .back-button { 
             display: inline-block; 
             margin-top: 30px; 
             padding: 12px 25px; 
-            background-color: #007bff; /* สีฟ้า */
+            background-color: #007bff; 
             color: white; 
             text-decoration: none; 
             border-radius: 6px; 
@@ -117,15 +119,33 @@
         .back-button:hover { 
             background-color: #0056b3; 
         }
-        .summary-info { /* ข้อมูลสรุปด้านบน */
+        .summary-info {
             text-align: center;
             margin-bottom: 25px;
             font-size: 1.1em;
             color: #555;
+            background-color: #f0f8ff; /* สีพื้นหลังกล่องข้อมูลสรุป */
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #d0e0ff;
         }
         .summary-info span {
             font-weight: bold;
             color: #333;
+        }
+        .summary-metric {
+            display: inline-block;
+            width: 48%; /* จัดสองคอลัมน์ */
+            vertical-align: top;
+            padding: 5px 0;
+        }
+        .summary-metric:first-child {
+            text-align: right;
+            padding: 5px 10px 5px 0;
+        }
+        .summary-metric:last-child {
+            text-align: left;
+            padding: 5px 0 5px 10px;
         }
     </style>
 </head>
@@ -134,38 +154,45 @@
         <h1><span style="color: #3498db;">&#10003;</span> ผลลัพธ์การจัดวางพื้นที่</h1>
 
         <div class="summary-info">
-            <p>พื้นที่ทั้งหมด: <span>{{ board_width }}x{{ board_height }} = {{ board_width * board_height }}</span> ตร.หน่วย</p>
-            <p>พื้นที่รวมที่ต้องการ: <span>{{ total_required_area }}</span> ตร.หน่วย</p>
+            <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+                <div class="summary-metric">
+                    <p>พื้นที่ทั้งหมด: <span>{{ board_width }}x{{ board_height }} = {{ board_width * board_height }}</span> ตร.หน่วย</p>
+                    <p>พื้นที่รวมที่ต้องการ: <span>{{ total_required_area }}</span> ตร.หน่วย</p>
+                </div>
+                <div class="summary-metric">
+                    <p>เปอร์เซ็นต์พื้นที่ที่ถูกใช้งาน: <span>{{ "%.2f" | format(percentage_covered) }}%</span></p>
+                    <p>จำนวนเซลล์ว่างที่เหลือ: <span>{{ empty_cells_count }}</span> ตร.หน่วย</p>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid #ddd; margin: 15px auto; width: 80%;">
+            <div style="text-align: center;">
+                <p>สร้างรูปแบบไม่ซ้ำกันได้สำเร็จ: <strong>{{ results | length }}</strong> รูปแบบ (จากที่ต้องการสูงสุด {{ num_simulations }} รูปแบบ)</p>
+                <p>จำนวนครั้งที่พยายามทั้งหมด: <strong>{{ total_attempts }}</strong> ครั้ง</p>
+                <p>รูปแบบไม่ซ้ำกันที่พบในระหว่างกระบวนการ: <strong>{{ total_unique }}</strong> รูปแบบ</p>
+            </div>
         </div>
 
-        {% if total_required_area > board_width * board_height %} {# แสดงคำเตือนถ้าพื้นที่ต้องการเกินพื้นที่รวม #}
+        {% if total_required_area > board_width * board_height %}
             <div class="warning-box">
                 <p><strong>*** คำเตือน:</strong> พื้นที่รวมที่ต้องการ ({{ total_required_area }} ตร.หน่วย) เกินพื้นที่ทั้งหมด ({{ board_width * board_height }} ตร.หน่วย) บางกิจกรรมอาจไม่สามารถจัดวางได้ครบถ้วนในรูปแบบเดียว</p>
             </div>
         {% endif %}
 
-        {% if not results %} {# แสดงข้อความถ้าไม่พบรูปแบบที่สำเร็จ #}
+        {% if not results %}
             <div class="info-box" style="background-color: #ffebee; color: #d32f2f; border-color: #ffcdd2;">
-                <p>ไม่สามารถสร้างรูปแบบการจัดวางที่ไม่ซ้ำกันได้สำเร็จตามจำนวนที่ต้องการ กรุณาลองปรับขนาดพื้นที่หรือกิจกรรมแล้วลองใหม่อีกครั้ง</p>
+                <p>ไม่สามารถสร้างรูปแบบที่ไม่ซ้ำกันได้สำเร็จตามจำนวนที่ต้องการ กรุณาลองปรับขนาดพื้นที่หรือกิจกรรมแล้วลองใหม่อีกครั้ง</p>
             </div>
         {% endif %}
 
-        <div class="info-box">
-            <p>สร้างรูปแบบที่ไม่ซ้ำกันได้สำเร็จ: <strong>{{ results | length }} รูปแบบ</strong></p>
-            <p>จำนวนครั้งที่พยายามทั้งหมด: <strong>{{ total_attempts }} ครั้ง</strong></p>
-            <p>จำนวนรูปแบบไม่ซ้ำกันทั้งหมดที่ค้นพบ: <strong>{{ total_unique }} รูปแบบ</strong></p>
-        </div>
-
-        {% for result in results %} {# วนลูปแสดงผลลัพธ์แต่ละรูปแบบ #}
+        {% for result in results %}
             <div class="result-block">
-                <h2>รูปแบบไม่ซ้ำกันที่ #{{ result.simulation_number }} (ความพยายามครั้งที่ {{ result.attempt_number }})</h2>
+                <h2>รูปแบบที่ #{{ result.simulation_number }} (ความพยายามครั้งที่ {{ result.attempt_number }})</h2>
                 <h3>การแสดงผลการจัดวาง:</h3>
-                {# รูปภาพถูกฝังโดยตรงด้วย Base64 string #}
-                <img src="data:image/png;base64,{{ result.plot_image }}" alt="Layout Visualization for Simulation {{ result.simulation_number }}">
+                <img src="data:image/png;base64,{{ result.plot_image }}" alt="Layout Visualization">
                 
-                <h3>รายละเอียดกิจกรรมที่จัดวางได้:</h3>
+                <h3>Activity Details:</h3>
                 <ul>
-                    {% for detail in result.activity_details %} {# วนลูปแสดงรายละเอียดกิจกรรมแต่ละอัน #}
+                    {% for detail in result.activity_details %}
                         <li>{{ detail }}</li>
                     {% endfor %}
                 </ul>
