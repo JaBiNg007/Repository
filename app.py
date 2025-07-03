@@ -149,7 +149,7 @@ app = Flask(__name__)  # สร้าง Instance ของ Flask App
 # ฟังก์ชันสำหรับแปลง Matplotlib plot เป็น Base64 image เพื่อแสดงบนเว็บ
 def get_plot_as_base64_image(board_width, board_height, placed_activities_info, simulation_num, total_area_covered):
     # ปรับปรุงประสิทธิภาพ: กำหนดขนาดรูปภาพให้คงที่และเล็ก (เพื่อประหยัด RAM)
-    fig, ax = plt.subplots(1, figsize=(4, 4)) # เปลี่ยนเป็นขนาดคงที่ 4x4 นิ้ว เพื่อประหยัด RAM สูงสุด
+    fig, ax = plt.subplots(1, figsize=(6,6)) # เปลี่ยนเป็นขนาดคงที่ 6x6 นิ้ว
 
     ax.set_facecolor('lightgray')
 
